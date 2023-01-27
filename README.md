@@ -8,3 +8,4 @@ signatures, add/remove member variables/functions in the provided classes but yo
 of the code. Specifically, you have to mandatorily use the classes provided in neuralnet.py to create your model (although, 
 like already mentioned, you can  add or remove variables/functions in these classes or change the function signatures)
 5. We have marked sections to be implemented by you as TODO for your convenience
+6. Just testing
