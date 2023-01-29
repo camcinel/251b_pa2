@@ -131,7 +131,7 @@ def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accu
     ax1.set_xlabel('Epochs', fontsize=35.0)
     ax1.set_ylabel('Cross Entropy Loss', fontsize=35.0)
     ax1.legend(loc="upper right", fontsize=35.0)
-    plt.savefig(constants.saveLocation + "loss.eps")
+    plt.savefig(constants.saveLocation + "loss.png")
     plt.show()
 
     fig2, ax2 = plt.subplots(figsize=((24, 12)))
@@ -144,7 +144,7 @@ def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accu
     ax2.set_xlabel('Epochs', fontsize=35.0)
     ax2.set_ylabel('Accuracy', fontsize=35.0)
     ax2.legend(loc="lower right", fontsize=35.0)
-    plt.savefig(constants.saveLocation + "accuracy.eps")
+    plt.savefig(constants.saveLocation + "accuracy.png")
     plt.show()
 
     # Saving the losses and accuracies for further offline use

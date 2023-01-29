@@ -29,6 +29,7 @@ def train(model, x_train, y_train, x_valid, y_valid, config):
     val_loss = []
     val_acc = []
     for epoch in tqdm(range(100)):
+        x_train, y_train = util.shuffle((x_train, y_train))
         epoch_loss = []
         epoch_acc = []
         for mini_batch in generate_minibatches((x_train, y_train)):

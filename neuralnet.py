@@ -119,7 +119,6 @@ class Layer:
         TODO in case you want to add variables here
         Define the architecture and create placeholders.
         """
-        np.random.seed(42)
 
         self.w = None
         if weight_type == 'random':
@@ -166,7 +165,7 @@ class Layer:
         delta = np.sum(self.activation.backward(self.a) * deltaCur, axis=0) / self.x.shape[0]
         L2_penalty = 2 * regularization * self.w
         delta_next = self.w @ delta
-        grad = - (np.outer(delta, np.ones(self.x.shape[0])) @ self.x)
+        grad = - (np.outer(delta, np.ones(self.x.shape[0])) @ self.x) / self.x.shape[0]
 
         if gradReqd:
             self.w = self.w - learning_rate * (np.transpose(grad) + L2_penalty) + momentum_gamma * self.dw
