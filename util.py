@@ -20,10 +20,8 @@ def load_config(path):
     return yaml.load(open(path, 'r'), Loader=yaml.SafeLoader)
 
 
-
 def normalize_data(inp):
     """
-    TODO
     Normalizes inputs (on per channel basis of every image) here to have 0 mean and unit variance.
     This will require reshaping to seprate the channels and then undoing it while returning
 
@@ -34,13 +32,15 @@ def normalize_data(inp):
         normalized inp: N X d 2D array
 
     """
-    raise NotImplementedError("normalize_data not implemented")
-
+    arr_3d = inp.reshape(inp.shape[0], 3, 32 * 32)
+    mu = np.mean(arr_3d, axis=2).reshape(inp.shape[0], 3, 1)
+    sigma = np.std(arr_3d, axis=2).reshape(inp.shape[0], 3, 1)
+    arr_3d_normal = (arr_3d - mu) / sigma
+    return arr_3d_normal.reshape(inp.shape[0], 32 * 32 * 3)
 
 
 def one_hot_encoding(labels, num_classes=20):
     """
-    TODO
     Encodes labels using one hot encoding.
 
     args:
@@ -51,8 +51,17 @@ def one_hot_encoding(labels, num_classes=20):
         oneHot : N X num_classes 2D array
 
     """
-    raise NotImplementedError("one_hot_encoding not implemented")
 
+
+    """count = 0
+    label_dict = {}
+    for label in labels:
+        if label not in label_dict.keys():
+            label_dict[label] = count
+            count += 1
+    num_labels = np.array([label_dict[label] for label in labels])"""
+
+    return np.eye(num_classes)[labels.flatten()]
 
 
 def generate_minibatches(dataset, batch_size=64):
@@ -77,9 +86,9 @@ def generate_minibatches(dataset, batch_size=64):
     yield X[l_idx:], y[l_idx:]
 
 
-def calculateCorrect(y,t):  #Feel free to use this function to return accuracy instead of number of correct predictions
+def calculate_correct(y, t):
+    # Feel free to use this function to return accuracy instead of number of correct predictions
     """
-    TODO
     Calculates the number of correct predictions
 
     args:
@@ -87,76 +96,100 @@ def calculateCorrect(y,t):  #Feel free to use this function to return accuracy i
         t: Labels in one hot encoding
 
     returns:
-        the number of correct predictions
+        the accuracy of prediction
     """
-    raise NotImplementedError("calculateCorrect not implemented")
-
+    y_pred = np.argmax(y, axis=1)
+    t_pred = np.argmax(t, axis=1)
+    return np.sum(y_pred == t_pred) / y.shape[0]
 
 
 def append_bias(X):
     """
-    TODO
     Appends bias to the input
     args:
         X (N X d 2D Array)
     returns:
         X_bias (N X (d+1)) 2D Array
     """
-    raise NotImplementedError("append_bias not implemented")
+    return np.insert(X, 0, 1, axis=1)
 
 
-
-
-def plots(trainEpochLoss, trainEpochAccuracy, valEpochLoss, valEpochAccuracy, earlyStop):
-
+def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accuracy, early_stop):
     """
     Helper function for creating the plots
     earlyStop is the epoch at which early stop occurred and will correspond to the best model. e.g. earlyStop=-1 means the last epoch was the best one
     """
 
     fig1, ax1 = plt.subplots(figsize=((24, 12)))
-    epochs = np.arange(1,len(trainEpochLoss)+1,1)
-    ax1.plot(epochs, trainEpochLoss, 'r', label="Training Loss")
-    ax1.plot(epochs, valEpochLoss, 'g', label="Validation Loss")
-    plt.scatter(epochs[earlyStop],valEpochLoss[earlyStop],marker='x', c='g',s=400,label='Early Stop Epoch')
-    plt.xticks(ticks=np.arange(min(epochs),max(epochs)+1,10), fontsize=35 )
+    epochs = np.arange(1, len(train_epoch_loss) + 1, 1)
+    ax1.plot(epochs, train_epoch_loss, 'r', label="Training Loss")
+    ax1.plot(epochs, val_epoch_loss, 'g', label="Validation Loss")
+    plt.scatter(epochs[early_stop], val_epoch_loss[early_stop], marker='x', c='g', s=400, label='Early Stop Epoch')
+    plt.xticks(ticks=np.arange(min(epochs), max(epochs) + 1, 10), fontsize=35)
     plt.yticks(fontsize=35)
     ax1.set_title('Loss Plots', fontsize=35.0)
     ax1.set_xlabel('Epochs', fontsize=35.0)
     ax1.set_ylabel('Cross Entropy Loss', fontsize=35.0)
     ax1.legend(loc="upper right", fontsize=35.0)
-    plt.savefig(constants.saveLocation+"loss.eps")
+    plt.savefig(constants.saveLocation + "loss.eps")
     plt.show()
 
     fig2, ax2 = plt.subplots(figsize=((24, 12)))
-    ax2.plot(epochs, trainEpochAccuracy, 'r', label="Training Accuracy")
-    ax2.plot(epochs, valEpochAccuracy, 'g', label="Validation Accuracy")
-    plt.scatter(epochs[earlyStop], valEpochAccuracy[earlyStop], marker='x', c='g', s=400, label='Early Stop Epoch')
-    plt.xticks(ticks=np.arange(min(epochs),max(epochs)+1,10), fontsize=35)
+    ax2.plot(epochs, train_epoch_accuracy, 'r', label="Training Accuracy")
+    ax2.plot(epochs, val_epoch_accuracy, 'g', label="Validation Accuracy")
+    plt.scatter(epochs[early_stop], val_epoch_accuracy[early_stop], marker='x', c='g', s=400, label='Early Stop Epoch')
+    plt.xticks(ticks=np.arange(min(epochs), max(epochs) + 1, 10), fontsize=35)
     plt.yticks(fontsize=35)
     ax2.set_title('Accuracy Plots', fontsize=35.0)
     ax2.set_xlabel('Epochs', fontsize=35.0)
     ax2.set_ylabel('Accuracy', fontsize=35.0)
     ax2.legend(loc="lower right", fontsize=35.0)
-    plt.savefig(constants.saveLocation+"accuarcy.eps")
+    plt.savefig(constants.saveLocation + "accuracy.eps")
     plt.show()
 
-    #Saving the losses and accuracies for further offline use
-    pd.DataFrame(trainEpochLoss).to_csv(constants.saveLocation+"trainEpochLoss.csv")
-    pd.DataFrame(valEpochLoss).to_csv(constants.saveLocation+"valEpochLoss.csv")
-    pd.DataFrame(trainEpochAccuracy).to_csv(constants.saveLocation+"trainEpochAccuracy.csv")
-    pd.DataFrame(valEpochAccuracy).to_csv(constants.saveLocation+"valEpochAccuracy.csv")
+    # Saving the losses and accuracies for further offline use
+    pd.DataFrame(train_epoch_loss).to_csv(constants.saveLocation + "trainEpochLoss.csv")
+    pd.DataFrame(val_epoch_loss).to_csv(constants.saveLocation + "valEpochLoss.csv")
+    pd.DataFrame(train_epoch_accuracy).to_csv(constants.saveLocation + "trainEpochAccuracy.csv")
+    pd.DataFrame(val_epoch_accuracy).to_csv(constants.saveLocation + "valEpochAccuracy.csv")
 
 
+def shuffle(dataset):
+    """
+    Shuffle dataset.
 
-def createTrainValSplit(x_train,y_train):
+    Parameters
+    ----------
+    dataset
+        Tuple containing
+            Images (X)
+            Labels (y)
 
+    Returns
+    -------
+        Tuple containing
+            Images (X)
+            Labels (y)
+    """
+    sigma = np.random.permutation(dataset[0].shape[0])
+
+    X_shuffled = dataset[0][sigma]
+    y_shuffled = dataset[1][sigma]
+
+    return X_shuffled, y_shuffled
+
+
+def create_train_val_split(x_train, y_train):
     """
     TODO
     Creates the train-validation split (80-20 split for train-val). Please shuffle the data before creating the train-val split.
     """
-    raise NotImplementedError("createTrainValSplit not implemented")
+    train_amount = np.ceil(.8 * x_train.shape[0]).astype(int)
 
+    X_shuffled, y_shuffled = shuffle((x_train, y_train))
+
+    return X_shuffled[:train_amount, :], y_shuffled[:train_amount], X_shuffled[train_amount:, :], y_shuffled[
+                                                                                                  train_amount:]
 
 
 def load_data(path):
@@ -169,6 +202,7 @@ def load_data(path):
         train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels,  test_normalized_images, test_one_hot_labels
 
     """
+
     def unpickle(file):
         with open(file, 'rb') as fo:
             dict = pickle.load(fo, encoding='bytes')
@@ -187,20 +221,21 @@ def load_data(path):
     train_labels.extend(label)
     train_images.extend(data)
     train_images = np.array(train_images)
-    train_labels = np.array(train_labels).reshape((len(train_labels),-1))
-    train_images, train_labels, val_images, val_labels = createTrainValSplit(train_images,train_labels)
+    train_labels = np.array(train_labels) #.reshape((len(train_labels), -1))
+    train_images, train_labels, val_images, val_labels = create_train_val_split(train_images, train_labels)
 
-    train_normalized_images =  None #TODO
-    train_one_hot_labels = None #TODO
+    train_normalized_images = normalize_data(train_images)
+    train_one_hot_labels = one_hot_encoding(train_labels)
 
-    val_normalized_images = None #TODO
-    val_one_hot_labels = None #TODO
+    val_normalized_images = normalize_data(val_images)
+    val_one_hot_labels = one_hot_encoding(val_labels)
 
     test_images_dict = unpickle(os.path.join(cifar_path, "test"))
     test_data = test_images_dict[b'data']
     test_labels = test_images_dict[b'coarse_labels']
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
-    test_normalized_images= None #TODO
-    test_one_hot_labels = None #TODO
-    return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels,  test_normalized_images, test_one_hot_labels
+    test_normalized_images = normalize_data(test_images)  # TODO
+    test_one_hot_labels = one_hot_encoding(test_labels)  # TODO
+    return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
+           test_normalized_images, test_one_hot_labels

@@ -1,6 +1,8 @@
 
 import copy
 from neuralnet import *
+from tqdm import tqdm
+from util import generate_minibatches
 
 def train(model, x_train, y_train, x_valid, y_valid, config):
     """
@@ -22,6 +24,25 @@ def train(model, x_train, y_train, x_valid, y_valid, config):
     """
 
     # Read in the esssential configs
+    train_loss = []
+    train_acc = []
+    val_loss = []
+    val_acc = []
+    for epoch in tqdm(range(100)):
+        epoch_loss = []
+        epoch_acc = []
+        for mini_batch in generate_minibatches((x_train, y_train)):
+            acc, loss = model.forward(mini_batch[0], mini_batch[1])
+            epoch_loss.append(loss)
+            epoch_acc.append(acc)
+            model.backward()
+        train_loss.append(sum(epoch_loss) / len(epoch_loss))
+        train_acc.append(sum(epoch_acc) / len(epoch_acc))
+        val_acc_epoch, val_loss_epoch = model.forward(x_valid, y_valid)
+        val_loss.append(val_loss_epoch)
+        val_acc.append(val_acc_epoch)
+
+    util.plots(train_loss, train_acc, val_loss, val_acc, -1)
 
     return model
 
@@ -40,6 +61,6 @@ def modelTest(model, X_test, y_test):
         test accuracy
         test loss
     """
-    raise NotImplementedError("Model test function not implmeneted")
+    return model.forward(X_test, y_test)
 
 

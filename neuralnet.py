@@ -1,19 +1,21 @@
 import numpy as np
 import util
 
-class Activation():
+
+class Activation:
     """
     The class implements different types of activation functions for
     your neural network layers.
 
     """
 
-    def __init__(self, activation_type = "sigmoid"):
+    def __init__(self, activation_type="sigmoid"):
         """
         TODO in case you want to add variables here
         Initialize activation type and placeholders here.
         """
-        if activation_type not in ["sigmoid", "tanh", "ReLU","output"]:   #output can be used for the final layer. Feel free to use/remove it
+        if activation_type not in ["sigmoid", "tanh", "ReLU",
+                                   "output"]:  # output can be used for the final layer. Feel free to use/remove it
             raise NotImplementedError(f"{activation_type} is not implemented.")
 
         # Type of non-linear activation.
@@ -60,49 +62,44 @@ class Activation():
         elif self.activation_type == "output":
             return self.grad_output(z)
 
-
     def sigmoid(self, x):
         """
-        TODO: Implement the sigmoid activation here.
         """
-        raise NotImplementedError("Sigmoid not implemented")
+        return 1 / (1 + np.exp(-x))
 
     def tanh(self, x):
         """
-        TODO: Implement tanh here.
         """
-        raise NotImplementedError("Tanh not implemented")
+        return np.tanh(x)
 
     def ReLU(self, x):
         """
-        TODO: Implement ReLU here.
         """
-        raise NotImplementedError("ReLU not implemented")
+        return np.maximum(0, x)
 
     def output(self, x):
         """
-        TODO: Implement softmax function here.
         Remember to take care of the overflow condition.
         """
-        raise NotImplementedError("output activation not implemented")
+        return np.exp(x - np.max(x, axis=1).reshape(-1, 1)) / np.sum(np.exp(x - np.max(x, axis=1).reshape(-1, 1)), axis=1)[:, None]
 
-    def grad_sigmoid(self,x):
+    def grad_sigmoid(self, x):
         """
         TODO: Compute the gradient for sigmoid here.
         """
-        raise NotImplementedError("Sigmoid gradient not implemented")
+        return np.exp(-x) / ((1 + np.exp(-x)) ** 2)
 
-    def grad_tanh(self,x):
+    def grad_tanh(self, x):
         """
         TODO: Compute the gradient for tanh here.
         """
-        raise NotImplementedError("Tanh gradient not implemented")
+        return 1 - np.tanh(x) ** 2
 
-    def grad_ReLU(self,x):
+    def grad_ReLU(self, x):
         """
         TODO: Compute the gradient for ReLU here.
         """
-        raise NotImplementedError("ReLU gradient not implemented")
+        return (x > 0) * 1
 
     def grad_output(self, x):
         """
@@ -112,12 +109,12 @@ class Activation():
         return 1
 
 
-class Layer():
+class Layer:
     """
     This class implements Fully Connected layers for your neural network.
     """
 
-    def __init__(self, in_units, out_units, activation, weightType):
+    def __init__(self, in_units, out_units, activation, weight_type):
         """
         TODO in case you want to add variables here
         Define the architecture and create placeholders.
@@ -125,13 +122,14 @@ class Layer():
         np.random.seed(42)
 
         self.w = None
-        if (weightType == 'random'):
+        if weight_type == 'random':
             self.w = 0.01 * np.random.random((in_units + 1, out_units))
 
-        self.x = None    # Save the input to forward in this
-        self.a = None    #output without activation
-        self.z = None    # Output After Activation
-        self.activation = activation   #Activation function
+        self.activation = activation  # Activation function
+
+        self.x = None  # Save the input to forward in this
+        self.a = None  # output without activation
+        self.z = None  # Output After Activation
 
 
         self.dw = 0  # Save the gradient w.r.t w in this. You can have bias in w itself or uncomment the next line and handle it separately
@@ -147,7 +145,10 @@ class Layer():
         """
         TODO: Compute the forward pass (activation of the weighted input) through the layer here and return it.
         """
-        raise NotImplementedError("Forward propagation not implemented for Layer")
+        self.x = util.append_bias(x)
+        self.a = self.x @ self.w
+        self.z = self.activation.forward(self.a)
+        return self.z
 
     def backward(self, deltaCur, learning_rate, momentum_gamma, regularization, gradReqd=True):
         """
@@ -160,10 +161,23 @@ class Layer():
         Feel free to change the function signature if you think of an alternative way to implement the delta calculation or the backward pass.
         gradReqd=True means update self.w with self.dw. gradReqd=False can be helpful for Q-3b
         """
-        raise NotImplementedError("Backward propagation not implemented for Layer")
+        if self.activation.activation_type != 'output':
+            deltaCur = deltaCur[1:]
+        delta = np.sum(self.activation.backward(self.a) * deltaCur, axis=0) / self.x.shape[0]
+        L2_penalty = 2 * regularization * self.w
+        delta_next = self.w @ delta
+        grad = - (np.outer(delta, np.ones(self.x.shape[0])) @ self.x)
+
+        if gradReqd:
+            self.w = self.w - learning_rate * (np.transpose(grad) + L2_penalty) + momentum_gamma * self.dw
+
+        self.dw = - learning_rate * (np.transpose(grad) + L2_penalty) + momentum_gamma * self.dw
+
+        return delta_next
 
 
-class Neuralnetwork():
+
+class Neuralnetwork:
     """
     Create a Neural Network specified by the network configuration mentioned in the config yaml file.
 
@@ -177,8 +191,12 @@ class Neuralnetwork():
         self.layers = []  # Store all layers in this list.
         self.num_layers = len(config['layer_specs']) - 1  # Set num layers here
         self.x = None  # Save the input to forward in this
-        self.y = None        # For saving the output vector of the model
+        self.y = None  # For saving the output vector of the model
         self.targets = None  # For saving the targets
+
+        self.learning_rate = config['learning_rate']
+        self.momentum_gamma = config['momentum_gamma']
+        self.regularization = config['L2_penalty']
 
         # Add layers specified by layer_specs.
         for i in range(self.num_layers):
@@ -197,29 +215,32 @@ class Neuralnetwork():
         """
         return self.forward(x, targets)
 
-
     def forward(self, x, targets=None):
         """
         TODO: Compute forward pass through all the layers in the network and return the loss.
         If targets are provided, return loss and accuracy/number of correct predictions as well.
         """
-        raise NotImplementedError("Forward propagation not implemented for NeuralNetwork")
+        self.x = x
+        for layer in self.layers:
+            x = layer.forward(x)
+        self.y = x
 
+        if targets is not None:
+            self.targets = targets
+            return util.calculate_correct(self.y, targets), self.loss(self.y, targets)
 
     def loss(self, logits, targets):
         '''
         TODO: compute the categorical cross-entropy loss and return it.
         '''
-        raise NotImplementedError("Loss not implemented for NeuralNetwork")
+        return - np.dot(targets.flatten(), np.log(logits, where=logits > 0).flatten()) / logits.shape[0]
 
     def backward(self, gradReqd=True):
         '''
         TODO: Implement backpropagation here by calling backward method of Layers class.
         Call backward methods of individual layers.
         '''
-        raise NotImplementedError("Backward propagation not implemented for NeuralNetwork")
-
-
-
-
+        delta = self.targets - self.y
+        for layer in reversed(self.layers):
+            delta = layer.backward(delta, self.learning_rate, self.momentum_gamma, self.regularization)
 
