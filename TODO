@@ -1,0 +1,1 @@
+neuralnet.py Line 184: grad = - np.outer(delta, np.mean(self.z, axis=0)
