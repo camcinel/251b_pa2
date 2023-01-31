@@ -1,0 +1,3 @@
+neuralnet.py:
+  Line 165: delta = np.mean(self.activation.backward(self.a) * deltaCur, axis=0)
+  Line 168: grad = - np.outer(delta, np.mean(self.x, axis=0)
