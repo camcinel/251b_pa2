@@ -119,7 +119,6 @@ class Layer:
         TODO in case you want to add variables here
         Define the architecture and create placeholders.
         """
-
         self.w = None
         if weight_type == 'random':
             self.w = 0.01 * np.random.random((in_units + 1, out_units))
@@ -161,16 +160,18 @@ class Layer:
         gradReqd=True means update self.w with self.dw. gradReqd=False can be helpful for Q-3b
         """
         if self.activation.activation_type != 'output':
-            deltaCur = deltaCur[1:]
-        delta = np.sum(self.activation.backward(self.a) * deltaCur, axis=0) / self.x.shape[0]
+            deltaCur = deltaCur[:, 1:]
+        delta = self.activation.backward(self.a) * deltaCur
+        # delta = np.mean(self.activation.backward(self.a) * deltaCur, axis=0)
         L2_penalty = 2 * regularization * self.w
-        delta_next = self.w @ delta
-        grad = - (np.outer(delta, np.ones(self.x.shape[0])) @ self.x) / self.x.shape[0]
+        delta_next = delta @ self.w.T
+        grad = -self.x.T @ delta + L2_penalty
+        # grad = - np.outer(np.mean(self.x, axis=0), delta) + L2_penalty
+
+        self.dw = - (learning_rate / self.x.shape[0]) * grad + momentum_gamma * self.dw
 
         if gradReqd:
-            self.w = self.w - learning_rate * (np.transpose(grad) + L2_penalty) + momentum_gamma * self.dw
-
-        self.dw = - learning_rate * (np.transpose(grad) + L2_penalty) + momentum_gamma * self.dw
+            self.w = self.w + self.dw
 
         return delta_next
 
@@ -232,7 +233,7 @@ class Neuralnetwork:
         '''
         TODO: compute the categorical cross-entropy loss and return it.
         '''
-        return - np.dot(targets.flatten(), np.log(logits, where=logits > 0).flatten()) / logits.shape[0]
+        return - np.dot(targets.flatten(), np.log(logits).flatten()) / logits.shape[0]
 
     def backward(self, gradReqd=True):
         '''

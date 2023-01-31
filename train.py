@@ -28,24 +28,45 @@ def train(model, x_train, y_train, x_valid, y_valid, config):
     train_acc = []
     val_loss = []
     val_acc = []
-    for epoch in tqdm(range(100)):
+    best_loss_epoch = 0
+    best_loss = np.inf
+    epoch_increase_counter = 0
+
+    for epoch in tqdm(range(config['epochs'])):
         x_train, y_train = util.shuffle((x_train, y_train))
         epoch_loss = []
         epoch_acc = []
-        for mini_batch in generate_minibatches((x_train, y_train)):
+        for mini_batch in generate_minibatches((x_train, y_train), batch_size=config['batch_size']):
             acc, loss = model.forward(mini_batch[0], mini_batch[1])
             epoch_loss.append(loss)
             epoch_acc.append(acc)
             model.backward()
-        train_loss.append(sum(epoch_loss) / len(epoch_loss))
-        train_acc.append(sum(epoch_acc) / len(epoch_acc))
+        train_loss.append(np.mean(epoch_loss))
+        train_acc.append(np.mean(epoch_acc))
+
         val_acc_epoch, val_loss_epoch = model.forward(x_valid, y_valid)
         val_loss.append(val_loss_epoch)
         val_acc.append(val_acc_epoch)
 
-    util.plots(train_loss, train_acc, val_loss, val_acc, -1)
+        if config['early_stop']:
+            if val_loss_epoch < best_loss:
+                best_loss = val_loss_epoch
+                best_loss_epoch = epoch
+                best_model = copy.deepcopy(model)
+                epoch_increase_counter = 0
+            elif val_loss_epoch > val_loss[-2]:
+                epoch_increase_counter += 1
+            else:
+                epoch_increase_counter = 0
+            if epoch_increase_counter >= config['early_stop_epoch']:
+                break
 
-    return model
+    if not config['early_stop']:
+        best_model = model
+
+    util.plots(train_loss, train_acc, val_loss, val_acc, best_loss_epoch)
+
+    return best_model
 
 #This is the test method
 def modelTest(model, X_test, y_test):

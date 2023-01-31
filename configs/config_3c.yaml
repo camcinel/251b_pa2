@@ -7,13 +7,13 @@ layer_specs: [3072, 128, 20]  #Represents a 2 layer NN. 3072 is the input layer
 activation: "tanh"
 
 # The learning rate to be used for training.
-learning_rate: 0.005
+learning_rate: 0.01
 
 # Number of training samples per batch to be passed to network
-batch_size: 128
+batch_size: 1024
 
 # Number of epochs to train the model
-epochs: 100
+epochs: 200
 
 # Flag to enable early stopping
 early_stop: True

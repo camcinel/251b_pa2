@@ -57,8 +57,6 @@ def main(args):
     model = train(model, x_train, y_train, x_valid, y_valid, config)
 
     # test the model. Use train.py's modelTest method for this
-    print(x_test.shape)
-    print(y_test.shape)
     test_acc, test_loss = modelTest(model, x_test, y_test)
 
     # Print test accuracy and test loss
