@@ -7,6 +7,59 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import constants
 
+def shuffle(dataset):
+    """
+    Shuffle dataset.
+
+    Parameters
+    ----------
+    dataset
+        Tuple containing
+            Images (X)
+            Labels (y)
+
+    Returns
+    -------
+        Tuple containing
+            Images (X)
+            Labels (y)
+    """
+    X,y=dataset
+    l=len(X)
+    index_list=np.arange(l)
+    np.random.shuffle(index_list)
+    images=np.array([X[i] for i in index_list])
+    labels=np.array([y[i] for i in index_list])
+    return images, labels
+
+def z_score_normalize(X, u = None, sd = None):
+    """
+    Performs z-score normalization on X. 
+
+    f(x) = (x - μ) / sigma
+        where 
+            μ = mean of x
+            sigma = standard deviation of x
+
+    Parameters
+    ----------
+    X : np.array
+        The data to z-score normalize
+    u (optional) : np.array
+        The mean to use when normalizing
+    sd (optional) : np.array
+        The standard deviation to use when normalizing
+
+    Returns
+    -------
+        Tuple:
+            Transformed dataset with mean 0 and stdev 1
+            Computed statistics (mean and stdev) for the dataset to undo z-scoring.
+    """
+    u=np.mean(X)
+    sd=np.std(X)
+    newX=(X-u)/sd
+    return newX
 
 def load_config(path):
     """
@@ -23,7 +76,6 @@ def load_config(path):
 
 def normalize_data(inp):
     """
-    TODO
     Normalizes inputs (on per channel basis of every image) here to have 0 mean and unit variance.
     This will require reshaping to seprate the channels and then undoing it while returning
 
@@ -34,13 +86,20 @@ def normalize_data(inp):
         normalized inp: N X d 2D array
 
     """
-    raise NotImplementedError("normalize_data not implemented")
+    returnarr=np.zeros([len(inp),len(inp[0])])
+    L=len(inp[0])//3
+    for i in range(len(inp)):
+        oneimage=np.zeros(len(inp[i])//3)
+        for c in range(3):
+            oneimage=z_score_normalize(inp[i][c*L:(c+1)*L])
+            returnarr[i][c*L:(c+1)*L]=oneimage
+    return returnarr
+    #raise NotImplementedError("normalize_data not implemented")
 
 
 
 def one_hot_encoding(labels, num_classes=20):
     """
-    TODO
     Encodes labels using one hot encoding.
 
     args:
@@ -51,7 +110,14 @@ def one_hot_encoding(labels, num_classes=20):
         oneHot : N X num_classes 2D array
 
     """
-    raise NotImplementedError("one_hot_encoding not implemented")
+    targets=np.arange(0,num_classes,1)
+    k=len(labels)
+    onehotarr=np.zeros([k,num_classes])
+    for i in range(k):
+        for j in range(num_classes):
+            onehotarr[i][j]=(labels[i]==targets[j])
+    return onehotarr
+    #raise NotImplementedError("one_hot_encoding not implemented")
 
 
 
@@ -89,20 +155,22 @@ def calculateCorrect(y,t):  #Feel free to use this function to return accuracy i
     returns:
         the number of correct predictions
     """
-    raise NotImplementedError("calculateCorrect not implemented")
+    return np.sum([(np.argmax(y[i])==np.argmax(t[i])) for i in range(len(y))])
+    #raise NotImplementedError("calculateCorrect not implemented")
 
 
 
 def append_bias(X):
     """
-    TODO
     Appends bias to the input
     args:
         X (N X d 2D Array)
     returns:
         X_bias (N X (d+1)) 2D Array
     """
-    raise NotImplementedError("append_bias not implemented")
+    return np.insert(X,0,1,axis=1)
+
+    #raise NotImplementedError("append_bias not implemented")
 
 
 
@@ -152,14 +220,22 @@ def plots(trainEpochLoss, trainEpochAccuracy, valEpochLoss, valEpochAccuracy, ea
 def createTrainValSplit(x_train,y_train):
 
     """
-    TODO
-    Creates the train-validation split (80-20 split for train-val). Please shuffle the data before creating the train-val split.
+    Creates the train-validation split (80-20 split for train-val).
+    Please shuffle the data before creating the train-val split.
     """
-    raise NotImplementedError("createTrainValSplit not implemented")
+    shuf_x, shuf_y = shuffle((x_train,y_train))
+    l=len(y_train)
+    spt_idx = int((l//5)*4)
+    train_im = shuf_x[:spt_idx]
+    train_lab= shuf_y[:spt_idx]
+    val_im = shuf_x[spt_idx:]
+    val_lab = shuf_y[spt_idx:]
+    return train_im, train_lab, val_im, val_lab
+    #raise NotImplementedError("createTrainValSplit not implemented")
 
 
 
-def load_data(path):
+def load_data(path,dataSize):
     """
     Loads, splits our dataset- CIFAR-100 into train, val and test sets and normalizes them
 
@@ -189,18 +265,52 @@ def load_data(path):
     train_images = np.array(train_images)
     train_labels = np.array(train_labels).reshape((len(train_labels),-1))
     train_images, train_labels, val_images, val_labels = createTrainValSplit(train_images,train_labels)
+    if dataSize==0:
+        train_images=train_images[:100]
+        train_labels=train_labels[:100]
+        val_images= val_images[:20]
+        val_labels= val_labels[:20]
+    print('normalizing train images ....')
+    train_normalized_images =  normalize_data(train_images) 
+    train_one_hot_labels = one_hot_encoding(train_labels) 
 
-    train_normalized_images =  None #TODO
-    train_one_hot_labels = None #TODO
-
-    val_normalized_images = None #TODO
-    val_one_hot_labels = None #TODO
+    print('normalizing validation images ....')
+    val_normalized_images = normalize_data(val_images) 
+    val_one_hot_labels = one_hot_encoding(val_labels) 
 
     test_images_dict = unpickle(os.path.join(cifar_path, "test"))
     test_data = test_images_dict[b'data']
     test_labels = test_images_dict[b'coarse_labels']
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
-    test_normalized_images= None #TODO
-    test_one_hot_labels = None #TODO
+    if dataSize==0:
+        test_images=test_images[:20]
+        test_labels=test_labels[:20]
+    test_normalized_images= normalize_data(test_images) 
+    test_one_hot_labels = one_hot_encoding(test_labels)
+
     return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels,  test_normalized_images, test_one_hot_labels
+
+
+def plotImage(X):
+    print(type(X))
+    L=len(X)//3
+    R=X[:L]
+    G=X[L:2*L]
+    B=X[2*L:3*L]
+    print(type(B))
+    BW=np.array([np.mean([R[i],G[i],B[i]]) for i in range(L)])
+
+    fig, ax = plt.subplots(2,2)
+    ax[0][0].pcolor(R.reshape(32,32),cmap='Reds',vmin=-2,vmax=2)
+    ax[0][1].pcolor(G.reshape(32,32),cmap='Greens',vmin=-2,vmax=2)
+    ax[1][0].pcolor(B.reshape(32,32),cmap='Blues',vmin=-2,vmax=2)
+    ax[1][1].pcolor(BW.reshape(32,32),cmap='Greys',vmin=-2,vmax=2)
+    ax[0][0].set_ylim([32,0])
+    ax[0][1].set_ylim([32,0])
+    ax[1][0].set_ylim([32,0])
+    ax[1][1].set_ylim([32,0])
+
+    plt.show()
+    plt.close()
+    plt.clf
