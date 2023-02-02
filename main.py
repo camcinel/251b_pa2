@@ -1,7 +1,7 @@
 ################################################################################
 # CSE 251B: Programming Assignment 2
 # Winter 2023
-# Code by Chaitanya Animesh
+# Code by Madeleine Kerr
 ################################################################################
 # To install PyYaml, refer to the instructions for your system:
 # https://pyyaml.org/wiki/PyYAMLDocumentation
@@ -15,6 +15,7 @@ from constants import *
 from train import *
 from gradient import *
 import argparse
+#import util
 
 #TODO
 def main(args):
@@ -23,7 +24,7 @@ def main(args):
     # Create different config files for different experiments
     configFile=None #Will contain the name of the config file to be loaded
     if (args.experiment == 'test_gradients'):  #3b
-        configFile = None # Create a config file for 3b and change None to the config file name
+        configFile = "config_3b.yaml" # Create a config file for 3b and change None to the config file name
     elif(args.experiment=='test_momentum'):  #3c
         configFile = "config_3c.yaml" # Create a config file for 3c and change None to the config file name
     elif (args.experiment == 'test_regularization'): #3d
@@ -39,8 +40,7 @@ def main(args):
         # in util.py first before running this experiment
 
     # Load the data
-    x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(path=datasetDir)  # Set datasetDir in constants.py
-
+    x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(path=datasetDir, dataSize=0)  # Set datasetDir in constants.py
     # Load the configuration from the corresponding yaml file. Specify the file path and name
     config = util.load_config(configYamlPath + configFile) # Set configYamlPath, configFile  in constants.py
 
