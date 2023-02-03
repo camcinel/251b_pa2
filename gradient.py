@@ -15,11 +15,14 @@ def check_grad(model, x_train, y_train):
         Prints gradient difference of values calculated via numerical approximation and backprop implementation
     """
     epsilon = 1.11e-2
+    layer_idx = 1 
+    weight_idx1 = 0 # 0 means bias and any other number works too
+    weight_idx2 = 1 # the index of the output on the next layer
 
     correct,loss=model.forward(x_train,targets=y_train)
     print("correct:", correct, " loss: ", loss)
 
-    correctP,lossP,correctM,lossM=model.forwardEpsilon(x_train,epsilon,1,0,1,targets=y_train)
+    correctP,lossP,correctM,lossM=model.forwardEpsilon(x_train,epsilon,layer_idx,weight_idx1,weight_idx2,targets=y_train)
     print("loss P:", lossP, " loss M: ", lossM)
 
     print("numerical:",(lossP-lossM)/(2*epsilon))
@@ -27,7 +30,7 @@ def check_grad(model, x_train, y_train):
 
     correct,loss=model.forward(x_train,targets=y_train)
     model.backward()
-    backprop_dEdw=-1*model.layers[1].dw[0][1]
+    backprop_dEdw=-1*model.layers[layer_idx].dw[weight_idx1][weight_idx2]
     print("backprop:",backprop_dEdw)
 
     print('diff:',numerical_dEdw-backprop_dEdw)
