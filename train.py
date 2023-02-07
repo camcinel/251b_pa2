@@ -32,7 +32,7 @@ def train(model, x_train, y_train, x_valid, y_valid, config):
     best_loss = np.inf
     epoch_increase_counter = 0
 
-    for epoch in tqdm(range(config['epochs'])):
+    for epoch in tqdm(range(config['epochs']), desc='epochs', total=float('inf'), leave=False):
         x_train, y_train = util.shuffle((x_train, y_train))
         epoch_loss = []
         epoch_acc = []
@@ -54,17 +54,17 @@ def train(model, x_train, y_train, x_valid, y_valid, config):
                 best_loss_epoch = epoch
                 best_model = copy.deepcopy(model)
                 epoch_increase_counter = 0
-            elif val_loss_epoch > val_loss[-2]:
-                epoch_increase_counter += 1
             else:
-                epoch_increase_counter = 0
+                epoch_increase_counter += 1
+
             if epoch_increase_counter >= config['early_stop_epoch']:
+                print(f'\n Early stop at epoch {epoch}')
                 break
 
     if not config['early_stop']:
         best_model = model
 
-    util.plots(train_loss, train_acc, val_loss, val_acc, best_loss_epoch)
+    util.plots(train_loss, train_acc, val_loss, val_acc, best_loss_epoch, name=config['name'])
 
     return best_model
 

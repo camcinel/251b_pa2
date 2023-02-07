@@ -114,7 +114,7 @@ def append_bias(X):
     return np.insert(X, 0, 1, axis=1)
 
 
-def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accuracy, early_stop):
+def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accuracy, early_stop, name=''):
     """
     Helper function for creating the plots
     earlyStop is the epoch at which early stop occurred and will correspond to the best model. e.g. earlyStop=-1 means the last epoch was the best one
@@ -131,7 +131,7 @@ def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accu
     ax1.set_xlabel('Epochs', fontsize=35.0)
     ax1.set_ylabel('Cross Entropy Loss', fontsize=35.0)
     ax1.legend(loc="upper right", fontsize=35.0)
-    plt.savefig(constants.saveLocation + "loss.png")
+    plt.savefig(constants.saveLocation + "loss_" + name + ".png")
     plt.show()
 
     fig2, ax2 = plt.subplots(figsize=((24, 12)))
@@ -144,14 +144,14 @@ def plots(train_epoch_loss, train_epoch_accuracy, val_epoch_loss, val_epoch_accu
     ax2.set_xlabel('Epochs', fontsize=35.0)
     ax2.set_ylabel('Accuracy', fontsize=35.0)
     ax2.legend(loc="lower right", fontsize=35.0)
-    plt.savefig(constants.saveLocation + "accuracy.png")
+    plt.savefig(constants.saveLocation + "accuracy_" + name + ".png")
     plt.show()
 
     # Saving the losses and accuracies for further offline use
-    pd.DataFrame(train_epoch_loss).to_csv(constants.saveLocation + "trainEpochLoss.csv")
-    pd.DataFrame(val_epoch_loss).to_csv(constants.saveLocation + "valEpochLoss.csv")
-    pd.DataFrame(train_epoch_accuracy).to_csv(constants.saveLocation + "trainEpochAccuracy.csv")
-    pd.DataFrame(val_epoch_accuracy).to_csv(constants.saveLocation + "valEpochAccuracy.csv")
+    pd.DataFrame(train_epoch_loss).to_csv(constants.saveLocation + "trainEpochLoss_" + name + ".csv")
+    pd.DataFrame(val_epoch_loss).to_csv(constants.saveLocation + "valEpochLoss_" + name + ".csv")
+    pd.DataFrame(train_epoch_accuracy).to_csv(constants.saveLocation + "trainEpochAccuracy_" + name + ".csv")
+    pd.DataFrame(val_epoch_accuracy).to_csv(constants.saveLocation + "valEpochAccuracy_" + name + ".csv")
 
 
 def shuffle(dataset):
@@ -225,10 +225,10 @@ def load_data(path):
     train_images, train_labels, val_images, val_labels = create_train_val_split(train_images, train_labels)
 
     train_normalized_images = normalize_data(train_images)
-    train_one_hot_labels = one_hot_encoding(train_labels)
+    train_one_hot_labels = one_hot_encoding(train_labels, num_classes=20)
 
     val_normalized_images = normalize_data(val_images)
-    val_one_hot_labels = one_hot_encoding(val_labels)
+    val_one_hot_labels = one_hot_encoding(val_labels, num_classes=20)
 
     test_images_dict = unpickle(os.path.join(cifar_path, "test"))
     test_data = test_images_dict[b'data']
@@ -236,6 +236,54 @@ def load_data(path):
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
     test_normalized_images = normalize_data(test_images)  # TODO
-    test_one_hot_labels = one_hot_encoding(test_labels)  # TODO
+    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=20)  # TODO
+    return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
+           test_normalized_images, test_one_hot_labels
+
+def load_data_fine(path):
+    """
+    Loads, splits our dataset- CIFAR-100 into train, val and test sets and normalizes them
+
+    args:
+        path: Path to cifar-100 dataset
+    returns:
+        train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels,  test_normalized_images, test_one_hot_labels
+
+    """
+
+    def unpickle(file):
+        with open(file, 'rb') as fo:
+            dict = pickle.load(fo, encoding='bytes')
+        return dict
+
+    cifar_path = os.path.join(path, constants.cifar100_directory)
+
+    train_images = []
+    train_labels = []
+    val_images = []
+    val_labels = []
+
+    images_dict = unpickle(os.path.join(cifar_path, "train"))
+    data = images_dict[b'data']
+    label = images_dict[b'fine_labels']
+    train_labels.extend(label)
+    train_images.extend(data)
+    train_images = np.array(train_images)
+    train_labels = np.array(train_labels) #.reshape((len(train_labels), -1))
+    train_images, train_labels, val_images, val_labels = create_train_val_split(train_images, train_labels)
+
+    train_normalized_images = normalize_data(train_images)
+    train_one_hot_labels = one_hot_encoding(train_labels, num_classes=100)
+
+    val_normalized_images = normalize_data(val_images)
+    val_one_hot_labels = one_hot_encoding(val_labels, num_classes=100)
+
+    test_images_dict = unpickle(os.path.join(cifar_path, "test"))
+    test_data = test_images_dict[b'data']
+    test_labels = test_images_dict[b'fine_labels']
+    test_images = np.array(test_data)
+    test_labels = np.array(test_labels).reshape((len(test_labels), -1))
+    test_normalized_images = normalize_data(test_images)  # TODO
+    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=100)  # TODO
     return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
            test_normalized_images, test_one_hot_labels

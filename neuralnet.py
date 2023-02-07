@@ -165,7 +165,7 @@ class Layer:
         # delta = np.mean(self.activation.backward(self.a) * deltaCur, axis=0)
         L2_penalty = 2 * regularization * self.w
         delta_next = delta @ self.w.T
-        grad = -self.x.T @ delta + L2_penalty
+        grad = -self.x.T @ delta + self.x.shape[0] * L2_penalty
         # grad = - np.outer(np.mean(self.x, axis=0), delta) + L2_penalty
 
         self.dw = - (learning_rate / self.x.shape[0]) * grad + momentum_gamma * self.dw
@@ -189,6 +189,8 @@ class Neuralnetwork:
         Create the Neural Network using config. Feel free to add variables here as per need basis
         """
         self.layers = []  # Store all layers in this list.
+        self.activations = config['activation']
+        self.activations.append('output')
         self.num_layers = len(config['layer_specs']) - 1  # Set num layers here
         self.x = None  # Save the input to forward in this
         self.y = None  # For saving the output vector of the model
@@ -200,13 +202,14 @@ class Neuralnetwork:
 
         # Add layers specified by layer_specs.
         for i in range(self.num_layers):
-            if i < self.num_layers - 1:
-                self.layers.append(
-                    Layer(config['layer_specs'][i], config['layer_specs'][i + 1], Activation(config['activation']),
-                          config["weight_type"]))
+            self.layers.append(
+                Layer(config['layer_specs'][i], config['layer_specs'][i + 1], Activation(self.activations[i]),
+                      config["weight_type"]))
+            """if i < self.num_layers - 1:
+                
             elif i == self.num_layers - 1:
                 self.layers.append(Layer(config['layer_specs'][i], config['layer_specs'][i + 1], Activation("output"),
-                                         config["weight_type"]))
+                                         config["weight_type"]))"""
 
     def __call__(self, x, targets=None):
         """

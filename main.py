@@ -29,22 +29,28 @@ def main(args):
     elif (args.experiment == 'test_regularization'):  # 3d
         configFile = None  # Create a config file for 3d and change None to the config file name
     elif (args.experiment == 'test_activation'):  # 3e
-        configFile = None  # Create a config file for 3e and change None to the config file name
+        configFile = 'config_3e.yaml'  # Create a config file for 3e and change None to the config file name
     elif (args.experiment == 'test_hidden_units'):  # 3f-i
         configFile = None  # Create a config file for 3f-i and change None to the config file name
     elif (args.experiment == 'test_hidden_layers'):  # 3f-ii
         configFile = None  # Create a config file for 3f-ii and change None to the config file name
     elif (args.experiment == 'test_100_classes'):  # 3g
-        configFile = None  # Create a config file for 3g and change None to the config file name. Please make the
+        configFile = 'config_3g.yaml'  # Create a config file for 3g and change None to the config file name. Please make the
         # necessary changes to load_data()
         # in util.py first before running this experiment
 
-    # Load the data
-    x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(
-        path=datasetDir)  # Set datasetDir in constants.py
-
     # Load the configuration from the corresponding yaml file. Specify the file path and name
     config = util.load_config(configYamlPath + configFile)  # Set configYamlPath, configFile  in constants.py
+
+    # Load the data
+    if config['image_type'] == 'coarse':
+        x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(
+            path=datasetDir)  # Set datasetDir in constants.py
+    elif config['image_type'] == 'fine':
+        x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data_fine(
+            path=datasetDir)  # Set datasetDir in constants.py
+    else:
+        raise NotImplementedError(f'image_type {config["image_type"]} not implemented')
 
     if (args.experiment == 'test_gradients'):
         gradient.checkGradient(x_train, y_train, config)
