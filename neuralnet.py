@@ -11,7 +11,6 @@ class Activation:
 
     def __init__(self, activation_type="sigmoid"):
         """
-        TODO in case you want to add variables here
         Initialize activation type and placeholders here.
         """
         if activation_type not in ["sigmoid", "tanh", "ReLU",
@@ -64,40 +63,44 @@ class Activation:
 
     def sigmoid(self, x):
         """
+        f(x) = 1 / (1 + exp(-x))
         """
         return 1 / (1 + np.exp(-x))
 
     def tanh(self, x):
         """
+        f(x) = tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
         """
         return np.tanh(x)
 
     def ReLU(self, x):
         """
+        f(x) = max(0, x)
         """
         return np.maximum(0, x)
 
     def output(self, x):
         """
-        Remember to take care of the overflow condition.
+        Sigmoid function:
+            f(x)_i = exp(x_i) / sum(exp(x_j))
         """
         return np.exp(x - np.max(x, axis=1).reshape(-1, 1)) / np.sum(np.exp(x - np.max(x, axis=1).reshape(-1, 1)), axis=1)[:, None]
 
     def grad_sigmoid(self, x):
         """
-        TODO: Compute the gradient for sigmoid here.
+        f(x) = exp(-x) / ((1 + exp(-x))^2)
         """
         return np.exp(-x) / ((1 + np.exp(-x)) ** 2)
 
     def grad_tanh(self, x):
         """
-        TODO: Compute the gradient for tanh here.
+        f(x) = 1 - tanh(x)^2
         """
         return 1 - np.tanh(x) ** 2
 
     def grad_ReLU(self, x):
         """
-        TODO: Compute the gradient for ReLU here.
+        f(x) = 1 if x > 0 else 0
         """
         return (x > 0) * 1
 
@@ -116,8 +119,13 @@ class Layer:
 
     def __init__(self, in_units, out_units, activation, weight_type):
         """
-        TODO in case you want to add variables here
-        Define the architecture and create placeholders.
+        Creates architecture for the layer
+
+        args:
+            in_units: dimension of input vectors
+            out_units: dimension of output vectors
+            activation: activation function for the layer
+            weight_type: type of weights. Currently, only randomly selected weights are used
         """
         self.w = None
         if weight_type == 'random':
@@ -141,7 +149,13 @@ class Layer:
 
     def forward(self, x):
         """
-        TODO: Compute the forward pass (activation of the weighted input) through the layer here and return it.
+        Computes forward pass of layer
+
+        args:
+            x - input matrix of data
+
+        returns:
+            activate weighted input for the layer
         """
         self.x = util.append_bias(x)
         self.a = self.x @ self.w
@@ -150,14 +164,17 @@ class Layer:
 
     def backward(self, deltaCur, learning_rate, momentum_gamma, regularization, gradReqd=True):
         """
-        TODO: Write the code for backward pass. This takes in gradient from its next layer as input and
-        computes gradient for its weights and the delta to pass to its previous layers. gradReqd is used to specify whether to update the weights i.e. whether self.w should
-        be updated after calculating self.dw
-        The delta expression (that you prove in PA2 part1) for any layer consists of delta and weights from the next layer and derivative of the activation function
-        of weighted inputs i.e. g'(a) of that layer. Hence deltaCur (the input parameter) will have to be multiplied with the derivative of the activation function of the weighted
-        input of the current layer to actually get the delta for the current layer. Remember, this is just one way of interpreting it and you are free to interpret it any other way.
-        Feel free to change the function signature if you think of an alternative way to implement the delta calculation or the backward pass.
-        gradReqd=True means update self.w with self.dw. gradReqd=False can be helpful for Q-3b
+        Performs backwards pass for the layer
+
+        args:
+            deltaCur - weighted sum of deltas from the next layer
+            learning_rate - multiple for learning rate
+            momentum_gamma - multiple for the momentum term
+            regularization - multiple for L2 regularization
+            gradReqd - boolean for updating weights. True == update weights
+
+        returns:
+            the trained model
         """
         if self.activation.activation_type != 'output':
             deltaCur = deltaCur[:, 1:]
@@ -185,20 +202,19 @@ class Neuralnetwork:
 
     def __init__(self, config):
         """
-        TODO in case you want to add variables here
-        Create the Neural Network using config. Feel free to add variables here as per need basis
+        Create the Neural Network using config.
         """
         self.layers = []  # Store all layers in this list.
-        self.activations = config['activation']
-        self.activations.append('output')
+        self.activations = config['activation']  # loads the layer list
+        self.activations.append('output') # appends output activation for final layer
         self.num_layers = len(config['layer_specs']) - 1  # Set num layers here
         self.x = None  # Save the input to forward in this
         self.y = None  # For saving the output vector of the model
         self.targets = None  # For saving the targets
 
-        self.learning_rate = config['learning_rate']
-        self.momentum_gamma = config['momentum_gamma']
-        self.regularization = config['L2_penalty']
+        self.learning_rate = config['learning_rate'] # loads learning rate
+        self.momentum_gamma = config['momentum_gamma'] # loads momentum factor
+        self.regularization = config['L2_penalty'] # loads L2 penalty factor
 
         # Add layers specified by layer_specs.
         for i in range(self.num_layers):
@@ -220,7 +236,6 @@ class Neuralnetwork:
 
     def forward(self, x, targets=None):
         """
-        TODO: Compute forward pass through all the layers in the network and return the loss.
         If targets are provided, return loss and accuracy/number of correct predictions as well.
         """
         self.x = x
@@ -234,13 +249,12 @@ class Neuralnetwork:
 
     def loss(self, logits, targets):
         '''
-        TODO: compute the categorical cross-entropy loss and return it.
+        Calculates Binary Cross Entropy
         '''
         return - np.dot(targets.flatten(), np.log(logits).flatten()) / logits.shape[0]
 
     def backward(self, gradReqd=True):
         '''
-        TODO: Implement backpropagation here by calling backward method of Layers class.
         Call backward methods of individual layers.
         '''
         delta = self.targets - self.y

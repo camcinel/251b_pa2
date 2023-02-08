@@ -181,7 +181,6 @@ def shuffle(dataset):
 
 def create_train_val_split(x_train, y_train):
     """
-    TODO
     Creates the train-validation split (80-20 split for train-val). Please shuffle the data before creating the train-val split.
     """
     train_amount = np.ceil(.8 * x_train.shape[0]).astype(int)
@@ -235,14 +234,15 @@ def load_data(path):
     test_labels = test_images_dict[b'coarse_labels']
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
-    test_normalized_images = normalize_data(test_images)  # TODO
-    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=20)  # TODO
+    test_normalized_images = normalize_data(test_images)
+    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=20)
     return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
            test_normalized_images, test_one_hot_labels
 
 def load_data_fine(path):
     """
     Loads, splits our dataset- CIFAR-100 into train, val and test sets and normalizes them
+    Uses fine labels instead of coarse
 
     args:
         path: Path to cifar-100 dataset
@@ -283,7 +283,7 @@ def load_data_fine(path):
     test_labels = test_images_dict[b'fine_labels']
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
-    test_normalized_images = normalize_data(test_images)  # TODO
-    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=100)  # TODO
+    test_normalized_images = normalize_data(test_images)
+    test_one_hot_labels = one_hot_encoding(test_labels, num_classes=100)
     return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
            test_normalized_images, test_one_hot_labels

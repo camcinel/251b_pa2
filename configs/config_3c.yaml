@@ -37,4 +37,4 @@ momentum_gamma: 0.9
 weight_type: "random"
 
 # Image Type
-image_type : 'fine'
+image_type : 'coarse'

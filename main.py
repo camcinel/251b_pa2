@@ -17,7 +17,7 @@ from gradient import *
 import argparse
 
 
-# TODO
+
 def main(args):
     # Read the required config
     # Create different config files for different experiments
