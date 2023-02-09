@@ -28,7 +28,7 @@ def main(args):
     elif(args.experiment=='test_momentum'):  #3c
         configFile = "config_3c.yaml" # Create a config file for 3c and change None to the config file name
     elif (args.experiment == 'test_regularization'): #3d
-        configFile = None # Create a config file for 3d and change None to the config file name
+        configFile = "config_3d.yaml" # Create a config file for 3d and change None to the config file name
     elif (args.experiment == 'test_activation'): #3e
         configFile = None # Create a config file for 3e and change None to the config file name
     elif (args.experiment == 'test_hidden_units'):  #3f-i
@@ -40,7 +40,7 @@ def main(args):
         # in util.py first before running this experiment
 
     # Load the data
-    x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(path=datasetDir, dataSize=0)  # Set datasetDir in constants.py
+    x_train, y_train, x_valid, y_valid, x_test, y_test = util.load_data(path=datasetDir)  # Set datasetDir in constants.py
     # Load the configuration from the corresponding yaml file. Specify the file path and name
     config = util.load_config(configYamlPath + configFile) # Set configYamlPath, configFile  in constants.py
 
@@ -49,13 +49,13 @@ def main(args):
         return 1
 
     # Create a Neural Network object which will be our model
-    model = None
+    model = Neuralnetwork(config)
 
     # train the model. Use train.py's train method for this
-    model = None
+    model = train(model, x_train, y_train, x_valid, y_valid, config)
 
     # test the model. Use train.py's modelTest method for this
-    test_acc, test_loss =  None,None
+    test_acc, test_loss = modelTest(model, x_test, y_test)
 
     # Print test accuracy and test loss
     print('Test Accuracy:', test_acc, ' Test Loss:', test_loss)
