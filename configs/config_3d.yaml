@@ -4,7 +4,7 @@
 layer_specs: [3072, 128, 20]  #Represents a 2 layer NN. 3072 is the input layer
 
 # Type of non-linear activation function to be used for the layers.
-activation: "ReLU"
+activation: "tanh"
 
 # The learning rate to be used for training.
 learning_rate: 0.01
@@ -22,7 +22,7 @@ early_stop: True
 early_stop_epoch: 5
 
 # Regularization constant
-L2_penalty: 0.003
+L2_penalty: 0.005
 
 # Use momentum for training
 momentum: True
@@ -32,37 +32,3 @@ momentum_gamma: 0.9
 
 #Weight Type
 weight_type: "random"
-
-
-
-#learn, batch ,epo, ESE  ,L2  GAMMA
-#.001,  200 ,  60 , 10 , .01 ,0.9   Test Accuracy: 0.2935  Test Loss: 2.386139852776404
-#.001,  200 ,  60 , 10 , .001 ,0.9  Test Accuracy: 0.2916  Test Loss: 2.395512061343882
-#ReLU .005,  200 ,  60 , 10 , .01 ,0.9 Test Accuracy: 0.273  Test Loss: 2.6189362503510356
-#ReLU .0005,  200 ,  100 , 10 , .01 ,0.9 Test Accuracy: 0.2963  Test Loss: 2.3635806286342276
-#ReLU .0005,  200 ,  130 , 10 , .01 ,0.9 Test Accuracy: 0.2964  Test Loss: 2.387769180082818
-#ReLU .0005,  500 ,  130 , 10 , .01 ,0.9 Test Accuracy: 0.2669  Test Loss: 2.4071605880269566
-#ReLU .0005,  500 ,  300 , 10 , .01 ,0.9 Test Accuracy: 0.2922  Test Loss: 2.380240890463291
-#ReLU .0005,  500 ,  300 , 10 , .001 ,0.9 Test Accuracy: 0.2925  Test Loss: 2.38655609318844
-#tanh .0005,  500 ,  300 , 10 , .001 ,0.9 Test Accuracy: 0.2499  Test Loss: 2.5370330580600187
-#tanh .005,  128 ,  300 , 10 , .001 ,0.9Test Accuracy: 0.2398  Test Loss: 2.7410664040304695
-
-
-# "ReLU" 0.01 1200, 300, 0.00005, 0.80 Test Accuracy: 0.2926  Test Loss: 2.374741393660091
-# "ReLU" 0.01 1200, 300, 0.000005, 0.80 Test Accuracy: 0.2928  Test Loss: 2.3839819121954298
-# "ReLU" 0.01 1200, 300, 0.00000, 0.80 Test Accuracy: 0.2918  Test Loss: 2.3749524590741022
-# "ReLU" 0.01 1200, 300, 0.000001, 0.80 Test Accuracy: 0.2931  Test Loss: 2.4165301203826353
-
-#"ReLU" 0.005 1000 300  0.000001 0.8 Test Accuracy: 0.2955  Test Loss: 2.3688542935010166
-
-
-# GEOMETRY
-
-#128 ReLU .0005,  200 ,  130 , 10 , .01 ,0.9 Test Accuracy: 0.2964  Test Loss: 2.387769180082818
-# 64 Test Accuracy: 0.2708  Test Loss: 2.4129930995181357
-# 256 Test Accuracy: 0.3077  Test Loss: 2.3461096271243673
-# 300 Test Accuracy: 0.3035  Test Loss: 2.337741720172518
-# 400 Test Accuracy: 0.3129  Test Loss: 2.342927157497667
-# 512 Test Accuracy: 0.3077  Test Loss: 2.3386363671946038
-
-# {'layer_specs': [3072, 256, 20], 'activation': 'ReLU', 'learning_rate': 0.001, 'batch_size': 300, 'epochs': 130, 'early_stop': True, 'early_stop_epoch': 5, 'L2_penalty': 0.0001, 'momentum': True, 'momentum_gamma': 0.9, 'weight_type': 'random'} Test Accuracy: 0.307  Test Loss: 2.3641362690588856
