@@ -35,9 +35,7 @@ def main(args):
     elif (args.experiment == 'test_hidden_layers'):  # 3f-ii
         configFile = None  # Create a config file for 3f-ii and change None to the config file name
     elif (args.experiment == 'test_100_classes'):  # 3g
-        configFile = 'config_3g.yaml'  # Create a config file for 3g and change None to the config file name. Please make the
-        # necessary changes to load_data()
-        # in util.py first before running this experiment
+        configFile = 'config_3g.yaml'  # Create a config file for 3g and change None to the config file name
 
     # Load the configuration from the corresponding yaml file. Specify the file path and name
     config = util.load_config(configYamlPath + configFile)  # Set configYamlPath, configFile  in constants.py
