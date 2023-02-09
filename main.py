@@ -32,10 +32,12 @@ def main(args):
         configFile = "config_3d.yaml"  # Create a config file for 3d and change None to the config file name
     elif (args.experiment == 'test_activation'):  # 3e
         configFile = 'config_3e.yaml'  # Create a config file for 3e and change None to the config file name
-    elif (args.experiment == 'test_hidden_units'):  # 3f-i
-        configFile = None  # Create a config file for 3f-i and change None to the config file name
+    elif (args.experiment == 'test_half_units'):  # 3f-i
+        configFile = 'config_3fia.yaml'  # Create a config file for 3f-i and change None to the config file name
+    elif (args.experiment == 'test_double_units'):  # 3f-i
+        configFile = 'config_3fib.yaml'  # Create a config file for 3f-i and change None to the config file name
     elif (args.experiment == 'test_hidden_layers'):  # 3f-ii
-        configFile = None  # Create a config file for 3f-ii and change None to the config file name
+        configFile = 'config_3fii.yaml'  # Create a config file for 3f-ii and change None to the config file name
     elif (args.experiment == 'test_100_classes'):  # 3g
         configFile = 'config_3g.yaml'  # Create a config file for 3g and change None to the config file name
 

@@ -1,22 +1,22 @@
 # Config name
-name : '3d'
+name : '3fii'
 
 # This specifies the number of layers and number of hidden neurons in each layer.
 # Note that the first and the last elements of the list indicate the input and
 # output sizes
-layer_specs: [3072, 128, 20]  #Represents a 2 layer NN. 3072 is the input layer
+layer_specs: [3072, 123, 123, 20]  #Represents a 2 layer NN. 3072 is the input layer
 
-# Type of non-linear activation function to be used for the layers.
-activation: ["tanh"]
+# Type of non-linear activation function(s) to be used for the hidden layer(s).
+activation: ["ReLU", "ReLU"]
 
 # The learning rate to be used for training.
-learning_rate: 0.01
+learning_rate: 0.0005
 
 # Number of training samples per batch to be passed to network
-batch_size: 1024
+batch_size: 256
 
 # Number of epochs to train the model
-epochs: 110
+epochs: 400
 
 # Flag to enable early stopping
 early_stop: True

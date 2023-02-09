@@ -94,7 +94,7 @@ class Activation:
         return np.exp(-x) / ((1 + np.exp(-x)) ** 2)
 
     def grad_tanh(self, x):
-        ""
+        """
         f(x) = 1 - tanh(x)^2
         """
         return 1 - np.tanh(x) ** 2
@@ -162,7 +162,7 @@ class Layer:
         self.z = self.activation.forward(self.a)
         return self.z
 
-    def backward(self, deltaCurrent, learning_rate, momentum_gamma, regularization, gradReqd=True):
+    def backward(self, deltaCur, learning_rate, momentum_gamma, regularization, gradReqd=True):
         """
         Performs backwards pass for the layer
 
@@ -299,5 +299,5 @@ class Neuralnetwork:
 
         if targets is not None:
             self.targets=targets
-            return util.calculateCorrect(WplusE,targets), self.loss(WplusE,targets),util.calculateCorrect(WminE,targets), self.loss(WminE,targets)
+            return util.calculate_correct(WplusE,targets), self.loss(WplusE,targets),util.calculate_correct(WminE,targets), self.loss(WminE,targets)
 
