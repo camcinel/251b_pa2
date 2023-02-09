@@ -7,6 +7,59 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import constants
 
+def shuffle(dataset):
+    """
+    Shuffle dataset.
+
+    Parameters
+    ----------
+    dataset
+        Tuple containing
+            Images (X)
+            Labels (y)
+
+    Returns
+    -------
+        Tuple containing
+            Images (X)
+            Labels (y)
+    """
+    X,y=dataset
+    l=len(X)
+    index_list=np.arange(l)
+    np.random.shuffle(index_list)
+    images=np.array([X[i] for i in index_list])
+    labels=np.array([y[i] for i in index_list])
+    return images, labels
+
+def z_score_normalize(X, u = None, sd = None):
+    """
+    Performs z-score normalization on X. 
+
+    f(x) = (x - μ) / sigma
+        where 
+            μ = mean of x
+            sigma = standard deviation of x
+
+    Parameters
+    ----------
+    X : np.array
+        The data to z-score normalize
+    u (optional) : np.array
+        The mean to use when normalizing
+    sd (optional) : np.array
+        The standard deviation to use when normalizing
+
+    Returns
+    -------
+        Tuple:
+            Transformed dataset with mean 0 and stdev 1
+            Computed statistics (mean and stdev) for the dataset to undo z-scoring.
+    """
+    u=np.mean(X)
+    sd=np.std(X)
+    newX=(X-u)/sd
+    return newX
 
 def load_config(path):
     """
@@ -51,8 +104,6 @@ def one_hot_encoding(labels, num_classes=20):
         oneHot : N X num_classes 2D array
 
     """
-
-
     """count = 0
     label_dict = {}
     for label in labels:
@@ -287,3 +338,25 @@ def load_data_fine(path):
     test_one_hot_labels = one_hot_encoding(test_labels, num_classes=100)
     return train_normalized_images, train_one_hot_labels, val_normalized_images, val_one_hot_labels, \
            test_normalized_images, test_one_hot_labels
+def plotImage(X):
+    print(type(X))
+    L=len(X)//3
+    R=X[:L]
+    G=X[L:2*L]
+    B=X[2*L:3*L]
+    print(type(B))
+    BW=np.array([np.mean([R[i],G[i],B[i]]) for i in range(L)])
+
+    fig, ax = plt.subplots(2,2)
+    ax[0][0].pcolor(R.reshape(32,32),cmap='Reds',vmin=-2,vmax=2)
+    ax[0][1].pcolor(G.reshape(32,32),cmap='Greens',vmin=-2,vmax=2)
+    ax[1][0].pcolor(B.reshape(32,32),cmap='Blues',vmin=-2,vmax=2)
+    ax[1][1].pcolor(BW.reshape(32,32),cmap='Greys',vmin=-2,vmax=2)
+    ax[0][0].set_ylim([32,0])
+    ax[0][1].set_ylim([32,0])
+    ax[1][0].set_ylim([32,0])
+    ax[1][1].set_ylim([32,0])
+
+    plt.show()
+    plt.close()
+    plt.clf

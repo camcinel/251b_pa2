@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import util
 
 
@@ -93,7 +94,7 @@ class Activation:
         return np.exp(-x) / ((1 + np.exp(-x)) ** 2)
 
     def grad_tanh(self, x):
-        """
+        ""
         f(x) = 1 - tanh(x)^2
         """
         return 1 - np.tanh(x) ** 2
@@ -108,7 +109,6 @@ class Activation:
         """
         Deliberately returning 1 for output layer case since we don't multiply by any activation for final layer's delta. Feel free to use/disregard it
         """
-
         return 1
 
 
@@ -162,7 +162,7 @@ class Layer:
         self.z = self.activation.forward(self.a)
         return self.z
 
-    def backward(self, deltaCur, learning_rate, momentum_gamma, regularization, gradReqd=True):
+    def backward(self, deltaCurrent, learning_rate, momentum_gamma, regularization, gradReqd=True):
         """
         Performs backwards pass for the layer
 
@@ -186,11 +186,22 @@ class Layer:
         # grad = - np.outer(np.mean(self.x, axis=0), delta) + L2_penalty
 
         self.dw = - (learning_rate / self.x.shape[0]) * grad + momentum_gamma * self.dw
-
+        
         if gradReqd:
             self.w = self.w + self.dw
 
         return delta_next
+        
+    def printLayer(self):
+        print("Activation:", self.activation.activation_type)
+        print("Weights:", np.shape(self.w)," weights \n")
+        print(self.w)
+        print("Output: \n")
+        print(self.z)
+        plt.imshow(self.w.reshape(np.shape(self.w)[1],np.shape(self.w)[0]))
+        plt.show()
+        plt.close()
+        plt.clf()
 
 
 
@@ -229,7 +240,6 @@ class Neuralnetwork:
 
     def __call__(self, x, targets=None):
         """
-
         Make NeuralNetwork callable.
         """
         return self.forward(x, targets)
@@ -260,4 +270,34 @@ class Neuralnetwork:
         delta = self.targets - self.y
         for layer in reversed(self.layers):
             delta = layer.backward(delta, self.learning_rate, self.momentum_gamma, self.regularization)
+
+    def printLayerStructure(self):
+        ct=0
+        for layer in self.layers:
+            print("Layer",ct, "weights:",np.shape(layer.w))
+            print("     bias weight:",layer.w[0][0])
+            print("     random weight",layer.w[4][8])
+            ct+=1
+
+    def forwardEpsilon(self,x,eps,layer_idx,biasORhidden,idx2,targets=None):
+        self.x = x
+        #set the specific layer weight to the w+e value
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]+eps
+        for layer in self.layers:
+            x = layer.forward(x)
+        WplusE=x
+
+        x = self.x
+        #set the specific layer weight to the w-e value
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]-2*eps
+        for layer in self.layers:
+            x = layer.forward(x)
+        WminE=x
+
+        #reset the specific layer weight to its initial value
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]+eps
+
+        if targets is not None:
+            self.targets=targets
+            return util.calculateCorrect(WplusE,targets), self.loss(WplusE,targets),util.calculateCorrect(WminE,targets), self.loss(WminE,targets)
 

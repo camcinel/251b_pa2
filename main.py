@@ -1,7 +1,7 @@
 ################################################################################
 # CSE 251B: Programming Assignment 2
 # Winter 2023
-# Code by Chaitanya Animesh
+# Code by Madeleine Kerr
 ################################################################################
 # To install PyYaml, refer to the instructions for your system:
 # https://pyyaml.org/wiki/PyYAMLDocumentation
@@ -15,19 +15,21 @@ from constants import *
 from train import *
 from gradient import *
 import argparse
+#import util
 
 
 
 def main(args):
     # Read the required config
     # Create different config files for different experiments
+
     configFile = None  # Will contain the name of the config file to be loaded
     if (args.experiment == 'test_gradients'):  # 3b
-        configFile = None  # Create a config file for 3b and change None to the config file name
+        configFile = "config_3b.yaml"  # Create a config file for 3b and change None to the config file name
     elif (args.experiment == 'test_momentum'):  # 3c
         configFile = "config_3c.yaml"  # Create a config file for 3c and change None to the config file name
     elif (args.experiment == 'test_regularization'):  # 3d
-        configFile = None  # Create a config file for 3d and change None to the config file name
+        configFile = "config_3d.yaml"  # Create a config file for 3d and change None to the config file name
     elif (args.experiment == 'test_activation'):  # 3e
         configFile = 'config_3e.yaml'  # Create a config file for 3e and change None to the config file name
     elif (args.experiment == 'test_hidden_units'):  # 3f-i
