@@ -179,13 +179,19 @@ class Layer():
         g_deriv = self.activation.backward(self.a)
         delta = g_deriv*deltaCurrent
         deltaNext=delta @ self.w.T
-        self.dw=self.x.T @ delta 
+
+        L2_penalty = 2 * regularization * self.w
+        grad = -self.x.T @ delta + L2_penalty*len(self.x)
+        self.dw = - (learning_rate/len(self.x)) * grad + momentum_gamma * self.dw
+
+        if gradReqd==False: # for 3b
+            self.dw = -1*(learning_rate/len(self.x))*grad
 
         if gradReqd:
             self.w=self.w+self.dw
+
         return deltaNext
 
-        #raise NotImplementedError("Backward propagation not implemented for Layer")
 
 
     def printLayer(self):
@@ -265,7 +271,7 @@ class Neuralnetwork():
         '''
         delta=self.targets-self.y
         for layer in reversed(self.layers):
-            delta = layer.backward(delta, None, None, None, gradReqd=True)
+            delta = layer.backward(delta,self.learning_rate, self.mom_gamma, self.L2penalty, gradReqd)
         #raise NotImplementedError("Backward propagation not implemented for NeuralNetwork")
 
     def printLayerStructure(self):
@@ -276,23 +282,23 @@ class Neuralnetwork():
             print("     random weight",layer.w[4][8])
             ct+=1
 
-    def forwardEpsilon(self,x,eps,layer_idx,biasORhidden,targets=None):
+    def forwardEpsilon(self,x,eps,layer_idx,biasORhidden,idx2,targets=None):
         self.x = x
         #set the specific layer weight to the w+e value
-        self.layers[layer_idx].w[biasORhidden][8]=self.layers[layer_idx].w[biasORhidden][8]+eps
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]+eps
         for layer in self.layers:
             x = layer.forward(x)
         WplusE=x
 
         x = self.x
         #set the specific layer weight to the w-e value
-        self.layers[layer_idx].w[biasORhidden][8]=self.layers[layer_idx].w[biasORhidden][8]-2*eps
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]-2*eps
         for layer in self.layers:
             x = layer.forward(x)
         WminE=x
 
         #reset the specific layer weight to its initial value
-        self.layers[layer_idx].w[biasORhidden][8]=self.layers[layer_idx].w[biasORhidden][8]+eps
+        self.layers[layer_idx].w[biasORhidden][idx2]=self.layers[layer_idx].w[biasORhidden][idx2]+eps
 
         if targets is not None:
             self.targets=targets
