@@ -235,7 +235,7 @@ def createTrainValSplit(x_train,y_train):
 
 
 
-def load_data(path,dataSize):
+def load_data(path):
     """
     Loads, splits our dataset- CIFAR-100 into train, val and test sets and normalizes them
 
@@ -265,11 +265,7 @@ def load_data(path,dataSize):
     train_images = np.array(train_images)
     train_labels = np.array(train_labels).reshape((len(train_labels),-1))
     train_images, train_labels, val_images, val_labels = createTrainValSplit(train_images,train_labels)
-    if dataSize==0:
-        train_images=train_images[:100]
-        train_labels=train_labels[:100]
-        val_images= val_images[:20]
-        val_labels= val_labels[:20]
+    
     print('normalizing train images ....')
     train_normalized_images =  normalize_data(train_images) 
     train_one_hot_labels = one_hot_encoding(train_labels) 
@@ -283,9 +279,6 @@ def load_data(path,dataSize):
     test_labels = test_images_dict[b'coarse_labels']
     test_images = np.array(test_data)
     test_labels = np.array(test_labels).reshape((len(test_labels), -1))
-    if dataSize==0:
-        test_images=test_images[:20]
-        test_labels=test_labels[:20]
     test_normalized_images= normalize_data(test_images) 
     test_one_hot_labels = one_hot_encoding(test_labels)
 
