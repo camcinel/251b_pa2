@@ -73,7 +73,7 @@ def load_config(path):
     return yaml.load(open(path, 'r'), Loader=yaml.SafeLoader)
 
 
-def normalize_data(inp):
+def normalize_data(inp, give_info=False):
     """
     Normalizes inputs (on per channel basis of every image) here to have 0 mean and unit variance.
     This will require reshaping to seprate the channels and then undoing it while returning
@@ -89,7 +89,10 @@ def normalize_data(inp):
     mu = np.mean(arr_3d, axis=2).reshape(inp.shape[0], 3, 1)
     sigma = np.std(arr_3d, axis=2).reshape(inp.shape[0], 3, 1)
     arr_3d_normal = (arr_3d - mu) / sigma
-    return arr_3d_normal.reshape(inp.shape[0], 32 * 32 * 3)
+    if give_info:
+        return mu, sigma
+    else:
+        return arr_3d_normal.reshape(inp.shape[0], 32 * 32 * 3)
 
 
 def one_hot_encoding(labels, num_classes=20):
@@ -360,3 +363,8 @@ def plotImage(X):
     plt.show()
     plt.close()
     plt.clf
+
+if __name__ == '__main__':
+    x = load_data("./data/")[0]
+    mu, sigma = normalize_data(x[1120:1122], give_info=True)
+    print(f'mean: {mu[0]}, standard deviation: {sigma[0]}')
